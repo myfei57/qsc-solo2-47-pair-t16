@@ -12,6 +12,9 @@ class WaterView:
     span: float
     edge_center: float
     generation: int
+    alignment: Mapping[str, str]
+    alignment_generation: int
+    setpoints: Mapping[str, float]
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -21,4 +24,7 @@ class WaterView:
             "span": self.span,
             "edge_center": self.edge_center,
             "generation": self.generation,
+            "alignment": dict(self.alignment),
+            "alignment_generation": self.alignment_generation,
+            "setpoints": dict(self.setpoints),
         }

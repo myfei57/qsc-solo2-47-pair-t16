@@ -272,3 +272,44 @@ def water_reading(console: Any, request: Request) -> Response:
 
 def water_profile(console: Any, request: Request) -> Response:
     return json_response(console.services.water.record_profile())
+
+
+def water_alignment(console: Any, request: Request) -> Response:
+    body = request.body()
+    pairs = {str(actuator): str(sensor) for actuator, sensor in body["pairs"].items()}
+    return json_response(
+        console.services.water.rebuild_alignment(pairs, body["confirmation_id"])
+    )
+
+
+def water_suggest(console: Any, request: Request) -> Response:
+    body = request.body()
+    return json_response(
+        console.services.water.suggest(
+            target=body.get("target"),
+            targets=body.get("targets"),
+            gain=float(body.get("gain", 4.0)),
+            edge_gain=float(body.get("edge_gain", 1.0)),
+            edge_margin=float(body.get("edge_margin", 0.5)),
+        )
+    )
+
+
+def water_apply(console: Any, request: Request) -> Response:
+    return json_response(console.services.water.apply_suggestion())
+
+
+def water_actuators(console: Any, request: Request) -> Response:
+    body = request.body()
+    setpoints = {str(name): float(value) for name, value in body["setpoints"].items()}
+    return json_response(
+        console.services.water.set_actuators(
+            setpoints,
+            target=body.get("target"),
+            targets=body.get("targets"),
+        )
+    )
+
+
+def water_evaluate(console: Any, request: Request) -> Response:
+    return json_response(console.services.water.evaluate())

@@ -42,7 +42,8 @@
       ["压区闭合", (s) => s.cal.nip_closed],
       ["新轴投入", (s) => s.reel.spool_loaded],
       ["损纸闩锁", (s) => s.broke.latched],
-      ["水份映射就绪", (s) => s.water.generation > 0]
+      ["水份映射就绪", (s) => s.water.generation > 0],
+      ["执行器对应就绪", (s) => s.water.alignment_generation > 0]
     ];
     async function refresh() {
       const state = await api("/api/state");

@@ -63,6 +63,14 @@
     <button onclick="post('/api/reel/bite', {})">咬纸</button>
   </section>
   <section>
+    <h1>横幅水份</h1>
+    <label>目标水份 <input id="moistureTarget" value="6.0"></label>
+    <button onclick="alignActuators()">重建执行器对应</button>
+    <button onclick="post('/api/water/suggest', {target: num('moistureTarget')})">按目标给建议</button>
+    <button onclick="post('/api/water/apply', {})">采纳建议</button>
+    <button onclick="post('/api/water/evaluate', {})">评估本次调整</button>
+  </section>
+  <section>
     <h1>损纸处理</h1>
     <label>损纸量 <input id="volume" value="12"></label>
     <label>批次 <input id="batch" value="B-001"></label>
@@ -81,6 +89,16 @@
     async function post(path, body) {
       const response = await fetch(path, {method: "POST", body: JSON.stringify(body)});
       out.textContent = path + " -> " + response.status + "\n" + JSON.stringify(await response.json(), null, 2);
+    }
+    async function alignActuators() {
+      const issued = await (await fetch("/api/confirmation", {
+        method: "POST",
+        body: JSON.stringify({name: "water.alignment", subject: "water", ttl_ticks: 20})
+      })).json();
+      post("/api/water/alignment", {
+        pairs: {"zone-front": "front", "zone-middle": "middle", "zone-back": "back"},
+        confirmation_id: issued.confirmation_id
+      });
     }
   </script>
 </body>

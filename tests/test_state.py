@@ -53,6 +53,7 @@ def test_verdict_history_is_reported_per_subject(console, services):
         "glue.concentration",
         "press.dryness",
         "steam.pressure",
+        "water.adjustment",
         "water.moisture",
     )
     ok(console, "GET", "/api/press/model")

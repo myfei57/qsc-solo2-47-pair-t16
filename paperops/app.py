@@ -99,6 +99,7 @@ def build_services(config: Config) -> Services:
             "glue.concentration": glue.history(),
             "broke.handling": broke.history(),
             "water.moisture": water.history(),
+            "water.adjustment": water.adjustment_history(),
         },
     )
 

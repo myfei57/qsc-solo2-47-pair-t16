@@ -370,6 +370,41 @@ def water_profile(console: Any, request: Request) -> Response:
     )
 
 
+def water_alignment(console: Any, request: Request) -> Response:
+    water = console.services.water
+    return json_response(
+        {
+            "alignment": water.alignment(),
+            "positions": water.alignment_positions(),
+            "generation": water.alignment_generation(),
+            "map_generation": water.generation(),
+        }
+    )
+
+
+def water_actuators(console: Any, request: Request) -> Response:
+    water = console.services.water
+    return json_response(
+        {
+            "setpoints": water.setpoints(),
+            "generation": water.alignment_generation(),
+            "suggestion": water.suggestion(),
+            "adjustment": water.adjustment(),
+        }
+    )
+
+
+def water_evaluations(console: Any, request: Request) -> Response:
+    evaluations = console.services.water.evaluations()
+    return json_response(
+        {
+            "evaluations": list(evaluations),
+            "latest": evaluations[-1] if evaluations else None,
+            "history": console.services.water.adjustment_history().to_dict(),
+        }
+    )
+
+
 def water_verdict(console: Any, request: Request) -> Response:
     water = console.services.water
     reading = request.number("reading", water.moisture())

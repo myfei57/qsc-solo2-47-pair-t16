@@ -17,6 +17,7 @@ from ..errors import (
     PreGateError,
     RollbackError,
     StaleArtifactError,
+    UnknownActuatorError,
     UnknownBatchError,
     UnknownConfirmationError,
     UnknownKeyError,
@@ -47,6 +48,7 @@ MISSING = (
     UnknownBatchError,
     BatchNotPendingError,
     UnknownSensorError,
+    UnknownActuatorError,
 )
 
 ROUTES: tuple[tuple[str, str, Handler], ...] = (
@@ -129,11 +131,19 @@ ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("GET", "/api/water/profile", handlers.water_profile),
     ("GET", "/api/water/verdict", handlers.water_verdict),
     ("GET", "/api/water/model", handlers.water_model),
+    ("GET", "/api/water/alignment", handlers.water_alignment),
+    ("GET", "/api/water/actuators", handlers.water_actuators),
+    ("GET", "/api/water/evaluations", handlers.water_evaluations),
     ("POST", "/api/water/map", operations.water_map),
     ("POST", "/api/water/scanner", operations.water_scanner),
     ("POST", "/api/water/sample", operations.water_sample),
     ("POST", "/api/water/reading", operations.water_reading),
     ("POST", "/api/water/profile", operations.water_profile),
+    ("POST", "/api/water/alignment", operations.water_alignment),
+    ("POST", "/api/water/suggest", operations.water_suggest),
+    ("POST", "/api/water/apply", operations.water_apply),
+    ("POST", "/api/water/actuators", operations.water_actuators),
+    ("POST", "/api/water/evaluate", operations.water_evaluate),
 ) + ((("GET", "/", handlers.page),) + tuple(
     ("GET", "/" + name, handlers.page) for name in page_names()
 ))

@@ -31,6 +31,11 @@
     <canvas id="profile" width="900" height="220"></canvas>
     <table id="points"><thead><tr><th>位置</th><th>水份</th></tr></thead><tbody></tbody></table>
   </section>
+  <section>
+    <h1>执行器建议与评估</h1>
+    <table id="moves"><thead><tr><th>执行器</th><th>位置</th><th>实测</th><th>目标</th><th>调整量</th><th>建议值</th><th>边缘补偿</th></tr></thead><tbody></tbody></table>
+    <pre id="verdict"></pre>
+  </section>
   <script>
     const api = async (path) => (await fetch(path)).json();
     function line(canvas, points, color) {
@@ -71,6 +76,25 @@
         tr.innerHTML = `<td>${point.position}</td><td>${point.moisture}</td>`;
         body.appendChild(tr);
       }
+      const actuators = await api("/api/water/actuators");
+      const movesBody = document.querySelector("#moves tbody");
+      movesBody.innerHTML = "";
+      if (actuators.suggestion) {
+        for (const move of actuators.suggestion.moves) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${move.actuator}</td><td>${move.position}</td>` +
+            `<td>${move.measured.toFixed(2)}</td><td>${move.target.toFixed(2)}</td>` +
+            `<td>${move.move.toFixed(1)}</td><td>${move.suggested.toFixed(1)}</td>` +
+            `<td>${move.edge ? "+" + move.edge_boost.toFixed(1) : ""}</td>`;
+          movesBody.appendChild(tr);
+        }
+      }
+      const evaluations = await api("/api/water/evaluations");
+      document.getElementById("verdict").textContent = evaluations.latest
+        ? `最近评估: ${evaluations.latest.verdict}，对应关系第 ${evaluations.latest.generation} 版，` +
+          `平均偏差 ${evaluations.latest.before.mean_abs_error.toFixed(2)} -> ${evaluations.latest.after.mean_abs_error.toFixed(2)}，` +
+          `边缘-中间差 ${evaluations.latest.before.edge_center.toFixed(2)} -> ${evaluations.latest.after.edge_center.toFixed(2)}`
+        : "尚无调整评估";
     }
     refresh();
     setInterval(refresh, 4000);
