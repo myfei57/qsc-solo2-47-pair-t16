@@ -19,6 +19,7 @@ def test_view_aggregates_every_subsystem(services):
         "reel",
         "broke",
         "water",
+        "profile",
     }
     assert view["tick"] == 0
     assert view["committed_keys"] == 0

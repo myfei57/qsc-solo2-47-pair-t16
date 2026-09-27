@@ -13,6 +13,7 @@ from .dry import DryService
 from .event import EventBus
 from .glue import GlueService
 from .press import PressService
+from .profile import ProfileService
 from .reel import ReelService
 from .state import StateService
 from .steam import SteamService
@@ -42,6 +43,7 @@ class Services:
     reel: ReelService
     broke: BrokeService
     water: WaterService
+    profile: ProfileService
     audit: AuditService
     state: StateService
     console: Any = None
@@ -56,6 +58,7 @@ class Services:
         self.reel.reload()
         self.broke.reload()
         self.water.reload()
+        self.profile.reload()
 
 
 def build_services(config: Config) -> Services:
@@ -76,6 +79,7 @@ def build_services(config: Config) -> Services:
     reel = ReelService(journal, bus, clock)
     broke = BrokeService(journal, bus, clock, batches)
     water = WaterService(journal, bus, clock, generations, confirmations)
+    profile = ProfileService(journal, bus, clock, generations, confirmations, water)
     audit = AuditService(AuditLog(config.data_dir), bus, clock)
     state = StateService(
         journal,
@@ -92,6 +96,7 @@ def build_services(config: Config) -> Services:
             "reel": reel,
             "broke": broke,
             "water": water,
+            "profile": profile,
         },
         histories={
             "press.dryness": press.history(),
@@ -119,6 +124,7 @@ def build_services(config: Config) -> Services:
         reel=reel,
         broke=broke,
         water=water,
+        profile=profile,
         audit=audit,
         state=state,
     )

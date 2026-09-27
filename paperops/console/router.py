@@ -3,6 +3,7 @@
 from typing import Any, Callable
 
 from ..errors import (
+    AlignmentError,
     BatchNotPendingError,
     CommitOrderError,
     ConfirmationMismatchError,
@@ -17,6 +18,8 @@ from ..errors import (
     PreGateError,
     RollbackError,
     StaleArtifactError,
+    UnknownActuatorError,
+    UnknownAdjustmentError,
     UnknownBatchError,
     UnknownConfirmationError,
     UnknownKeyError,
@@ -40,13 +43,15 @@ CONFLICT = (
     RollbackError,
     CommitOrderError,
 )
-MALFORMED = (OutOfRangeError, UnknownStageError, ConfirmationMismatchError)
+MALFORMED = (OutOfRangeError, UnknownStageError, ConfirmationMismatchError, AlignmentError)
 MISSING = (
     UnknownKeyError,
     UnknownConfirmationError,
     UnknownBatchError,
     BatchNotPendingError,
     UnknownSensorError,
+    UnknownActuatorError,
+    UnknownAdjustmentError,
 )
 
 ROUTES: tuple[tuple[str, str, Handler], ...] = (
@@ -134,6 +139,13 @@ ROUTES: tuple[tuple[str, str, Handler], ...] = (
     ("POST", "/api/water/sample", operations.water_sample),
     ("POST", "/api/water/reading", operations.water_reading),
     ("POST", "/api/water/profile", operations.water_profile),
+    ("GET", "/api/profile/state", handlers.profile_state),
+    ("GET", "/api/profile/alignment", handlers.profile_alignment),
+    ("POST", "/api/profile/alignment", operations.profile_alignment),
+    ("GET", "/api/profile/suggest", handlers.profile_suggest),
+    ("POST", "/api/profile/adjust", operations.profile_adjust),
+    ("POST", "/api/profile/evaluate", operations.profile_evaluate),
+    ("GET", "/api/profile/adjustments", handlers.profile_adjustments),
 ) + ((("GET", "/", handlers.page),) + tuple(
     ("GET", "/" + name, handlers.page) for name in page_names()
 ))

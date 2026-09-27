@@ -31,6 +31,10 @@ TOPIC_WATER_MAP = "water.map.rebuilt"
 TOPIC_WATER_PROFILE = "water.profile.changed"
 TOPIC_WATER_SAMPLE = "water.sample.added"
 
+TOPIC_PROFILE_ALIGNMENT = "profile.alignment.rebuilt"
+TOPIC_PROFILE_ADJUST = "profile.adjustment.recorded"
+TOPIC_PROFILE_EVALUATED = "profile.adjustment.evaluated"
+
 TOPIC_SNAPSHOT = "state.snapshot"
 
 ALL_TOPICS: tuple[str, ...] = (
@@ -57,5 +61,8 @@ ALL_TOPICS: tuple[str, ...] = (
     TOPIC_WATER_MAP,
     TOPIC_WATER_PROFILE,
     TOPIC_WATER_SAMPLE,
+    TOPIC_PROFILE_ALIGNMENT,
+    TOPIC_PROFILE_ADJUST,
+    TOPIC_PROFILE_EVALUATED,
     TOPIC_SNAPSHOT,
 )

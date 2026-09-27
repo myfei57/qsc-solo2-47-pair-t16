@@ -400,6 +400,33 @@ def water_model(console: Any, request: Request) -> Response:
     )
 
 
+def profile_state(console: Any, request: Request) -> Response:
+    return json_response(console.services.profile.view().to_dict())
+
+
+def profile_alignment(console: Any, request: Request) -> Response:
+    profile = console.services.profile
+    return json_response(
+        {"pairs": list(profile.alignment()), "generation": profile.generation()}
+    )
+
+
+def profile_suggest(console: Any, request: Request) -> Response:
+    raw = request.param("target")
+    target = None if raw is None else float(raw)
+    return json_response(console.services.profile.suggest(target))
+
+
+def profile_adjustments(console: Any, request: Request) -> Response:
+    profile = console.services.profile
+    return json_response(
+        {
+            "generation": profile.generation(),
+            "adjustments": list(profile.adjustments()),
+        }
+    )
+
+
 def page(console: Any, request: Request) -> Response:
     name = request.path.lstrip("/") or "index.html"
     return read_page(console.services.config.web_dir, name)

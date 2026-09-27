@@ -75,3 +75,15 @@ class OutOfRangeError(ContractError):
 
 class UnknownSensorError(ContractError):
     """Raised when a moisture sensor is addressed before it is mapped."""
+
+
+class AlignmentError(ContractError):
+    """Raised when an actuator to sensor alignment is not one-to-one or unusable."""
+
+
+class UnknownActuatorError(ContractError):
+    """Raised when an actuator is addressed before it is aligned to a sensor."""
+
+
+class UnknownAdjustmentError(ContractError):
+    """Raised when a profile adjustment is evaluated before it is recorded."""

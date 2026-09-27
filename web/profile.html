@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <title>横幅控制</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; background: #0f1720; color: #dfe7ef; }
+    h1 { font-size: 20px; margin: 0 0 16px; }
+    nav a { color: #7fc4ff; margin-right: 14px; text-decoration: none; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 12px; }
+    th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid #26333f; }
+    .card { background: #18222e; border: 1px solid #26333f; border-radius: 8px; padding: 12px; margin-top: 18px; }
+    .card h2 { font-size: 13px; margin: 0 0 8px; color: #9fb3c8; font-weight: 600; }
+    button { background: #1f6feb; color: #fff; border: 0; border-radius: 6px; padding: 6px 14px; cursor: pointer; margin-right: 8px; }
+    input { background: #101a24; border: 1px solid #26333f; color: #dfe7ef; border-radius: 6px; padding: 5px 8px; width: 90px; }
+    .good { color: #4cc38a; }
+    .bad { color: #d05a5a; }
+    .hint { color: #9fb3c8; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>横幅水份控制</h1>
+  <nav>
+    <a href="/">总览</a>
+    <a href="/operations.html">操作</a>
+    <a href="/curves.html">曲线</a>
+    <a href="/profile.html">横幅</a>
+    <a href="/audit.html">记录</a>
+  </nav>
+
+  <div class="card">
+    <h2>对应关系（传感器 ↔ 执行器）</h2>
+    <div id="alignment">加载中…</div>
+  </div>
+
+  <div class="card">
+    <h2>建议（按目标横幅，边缘单独补偿）</h2>
+    <label>目标水份 <input id="target" type="number" step="0.1" value="7.0"></label>
+    <button onclick="suggest()">计算建议</button>
+    <button onclick="adjust()">按建议记录调整</button>
+    <button onclick="evaluate()">评估最近一次调整</button>
+    <div id="suggestion"></div>
+  </div>
+
+  <div class="card">
+    <h2>调整记录（每次调整所用的对应关系版本与效果）</h2>
+    <div id="adjustments">加载中…</div>
+  </div>
+
+  <script>
+    const api = async (path, options) => (await fetch(path, options)).json();
+    const post = (path, body) => api(path, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(body || {})
+    });
+    const num = (v) => typeof v === "number" ? v.toFixed(2) : "—";
+
+    async function alignment() {
+      const body = await api("/api/profile/alignment");
+      const el = document.getElementById("alignment");
+      if (!body.pairs.length) {
+        el.innerHTML = '<span class="hint">尚未建立对应关系。</span>';
+        return;
+      }
+      el.innerHTML = `<div>当前版本：第 ${body.generation} 版</div><table><thead>` +
+        "<tr><th>执行器</th><th>传感器</th><th>位置 (m)</th><th>分区</th></tr></thead><tbody>" +
+        body.pairs.map((p) =>
+          `<tr><td>${p.actuator}</td><td>${p.sensor}</td><td>${num(p.position)}</td>` +
+          `<td>${p.zone === "edge" ? "边缘" : "中部"}</td></tr>`
+        ).join("") + "</tbody></table>";
+    }
+
+    async function suggest() {
+      const target = document.getElementById("target").value;
+      const body = await api("/api/profile/suggest?target=" + encodeURIComponent(target));
+      const el = document.getElementById("suggestion");
+      if (body.error) { el.innerHTML = `<span class="bad">${body.error}</span>`; return; }
+      el.innerHTML = `<div class="hint">对应关系第 ${body.generation} 版 · 边缘偏差 ${num(body.edge_bias)}</div>` +
+        "<table><thead><tr><th>执行器</th><th>实测</th><th>目标</th><th>偏差</th><th>建议调整量</th></tr></thead><tbody>" +
+        body.moves.map((m) =>
+          `<tr><td>${m.actuator}</td><td>${num(m.measured)}</td><td>${num(m.target)}</td>` +
+          `<td>${num(m.error)}</td><td>${num(m.move)}</td></tr>`
+        ).join("") + "</tbody></table>";
+    }
+
+    async function adjust() {
+      const target = parseFloat(document.getElementById("target").value);
+      const body = await post("/api/profile/adjust", {target});
+      if (body.error) { alert(body.error); return; }
+      refresh();
+    }
+
+    async function evaluate() {
+      const body = await post("/api/profile/evaluate", {});
+      if (body.error) { alert(body.error); return; }
+      refresh();
+    }
+
+    async function adjustments() {
+      const body = await api("/api/profile/adjustments");
+      const el = document.getElementById("adjustments");
+      if (!body.adjustments.length) {
+        el.innerHTML = '<span class="hint">还没有调整记录。</span>';
+        return;
+      }
+      el.innerHTML = "<table><thead><tr><th>编号</th><th>对应关系版本</th><th>目标</th>" +
+        "<th>调前 RMS</th><th>调后 RMS</th><th>边缘差变化</th><th>结论</th></tr></thead><tbody>" +
+        body.adjustments.map((a) => {
+          const done = a.status === "evaluated";
+          const verdict = done
+            ? (a.improved ? '<span class="good">变好</span>' : '<span class="bad">未变好</span>')
+            : '<span class="hint">待评估</span>';
+          return `<tr><td>${a.adjustment_id}</td><td>第 ${a.generation} 版</td><td>${num(a.target)}</td>` +
+            `<td>${num(a.before.rms)}</td><td>${done ? num(a.after.rms) : "—"}</td>` +
+            `<td>${done ? num(a.deltas.edge_center) : "—"}</td><td>${verdict}</td></tr>`;
+        }).join("") + "</tbody></table>";
+    }
+
+    function refresh() { alignment(); adjustments(); }
+    refresh();
+    setInterval(refresh, 3000);
+  </script>
+</body>
+</html>

@@ -31,6 +31,9 @@ WATER_MAP = "water/map"
 WATER_PROFILE = "water/profile"
 WATER_SAMPLES = "water/samples"
 
+PROFILE_ALIGNMENT = "profile/alignment"
+PROFILE_ADJUSTMENTS = "profile/adjustments"
+
 VERSION_PREFIX = "version/"
 CONFIRMATION_PREFIX = "confirmation/"
 ARTIFACT_PREFIX = "artifact/"

@@ -272,3 +272,25 @@ def water_reading(console: Any, request: Request) -> Response:
 
 def water_profile(console: Any, request: Request) -> Response:
     return json_response(console.services.water.record_profile())
+
+
+def profile_alignment(console: Any, request: Request) -> Response:
+    body = request.body()
+    return json_response(
+        console.services.profile.rebuild_alignment(body["pairs"], body["confirmation_id"])
+    )
+
+
+def profile_adjust(console: Any, request: Request) -> Response:
+    body = request.body()
+    target = body.get("target")
+    return json_response(
+        console.services.profile.adjust(
+            None if target is None else float(target),
+            body.get("moves"),
+        )
+    )
+
+
+def profile_evaluate(console: Any, request: Request) -> Response:
+    return json_response(console.services.profile.evaluate(request.body().get("adjustment_id")))

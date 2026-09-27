@@ -23,6 +23,7 @@
     <a href="/">总览</a>
     <a href="/operations.html">操作</a>
     <a href="/curves.html">曲线</a>
+    <a href="/profile.html">横幅</a>
     <a href="/audit.html">记录</a>
   </nav>
   <div class="grid" id="lamps"></div>
@@ -42,7 +43,8 @@
       ["压区闭合", (s) => s.cal.nip_closed],
       ["新轴投入", (s) => s.reel.spool_loaded],
       ["损纸闩锁", (s) => s.broke.latched],
-      ["水份映射就绪", (s) => s.water.generation > 0]
+      ["水份映射就绪", (s) => s.water.generation > 0],
+      ["横幅对应关系就绪", (s) => s.profile.generation > 0]
     ];
     async function refresh() {
       const state = await api("/api/state");
